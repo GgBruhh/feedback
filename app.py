@@ -37,17 +37,17 @@ def register_user():
         first_name = form.first_name.data
         last_name = form.last_name.data
 
-        new_user = User.register(username, password, email, first_name, last_name)
+        user = User.register(username, password, email, first_name, last_name)
         db.session.commit()
-        session['username'] = new_user.username
-        return redirect('/secret')
+        session['username'] = user.username
+        return redirect(f'/users/{user.username}')
 
 #Log in routes---------------------------------------------------
 @app.route('/login')
 def login_form():
 
     if 'username' in session:
-        return redirect('/secret')
+        return redirect(f"/users/{session['username']}")
     
     form = LoginForm()
     return render_template('login_form.html', form=form)
@@ -63,15 +63,17 @@ def user_login():
         session['username'] = username
         
         if user:
-            return redirect('/secret')
+            return redirect('/users/{user.username}')
 
 #Route for the /secret page!-------------------------------------
-@app.route('/secret')
-def secret_page():
+@app.route('/users/<username>')
+def user_page(username):
     if 'username' not in session:
         flash('Please login/register first!')
         return redirect('/')
-    return render_template('secret.html')
+    user = User.query.get_or_404(username)
+
+    return render_template('secret.html', user=user)
 
 #Route to logout------------------------------------------------
 @app.route('/logout')
