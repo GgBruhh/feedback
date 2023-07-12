@@ -8,6 +8,25 @@
     <link rel="stylesheet" href="https://bootswatch.com/4/flatly/bootstrap.min.css">
 </head>
 <body>
+    <nav class="navbar navbar-light bg-primary justify-content-between ">
+        <div class="container">
+          <ul class="nav navbar-nav flex-row float-right">
+            <a href="/" class="nav-link pr-3 text-light">Home</a>
+            {% if session['username'] %}
+            <li class="nav-item">
+              <a class="nav-link pr-3 text-light" href="/logout">Logout</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link pr-3 text-light" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-light" href="/register">Sign up</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
     <main id="content">
         {% block content %} {% endblock %}
     </main>   
