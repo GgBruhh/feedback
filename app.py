@@ -60,12 +60,15 @@ def user_login():
         username = form.username.data
         password = form.password.data
         user = User.authenticate(username, password)
-        session['username'] = username
         
         if user:
+            session['username'] = username
             return redirect(f'/users/{user.username}')
+        else:
+            form.username.errors = ["Invalid username/password."]
+            return render_template("login_form.html", form=form)
 
-#Route for the /secret page!-------------------------------------
+#User routes----------------------------------------------------
 @app.route('/users/<username>')
 def user_page(username):
     if 'username' not in session:
@@ -73,7 +76,16 @@ def user_page(username):
         return redirect('/')
     user = User.query.get_or_404(username)
 
-    return render_template('secret.html', user=user)
+    return render_template('secret.html', user=user)    
+
+@app.route('/users/<username>/delete', methods=['POST'])
+def delete_user(username):
+
+    user = User.query.get_or_404(username)
+    db.session.delete(user)
+    db.session.commit()
+    session.pop('username')
+    return redirect('/')
 
 #Route to logout------------------------------------------------
 @app.route('/logout')
