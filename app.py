@@ -58,12 +58,12 @@ def user_login():
 
     if form.validate_on_submit():
         username = form.username.data
-        password = form.username.data
+        password = form.password.data
         user = User.authenticate(username, password)
         session['username'] = username
         
         if user:
-            return redirect('/users/{user.username}')
+            return redirect(f'/users/{user.username}')
 
 #Route for the /secret page!-------------------------------------
 @app.route('/users/<username>')
