@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, session, flash
 from forms import UserForm, LoginForm
-from models import User, connect_db, db
+from models import User, Feedback, connect_db, db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///feedback'
