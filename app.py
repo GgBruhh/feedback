@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, session, flash
-from forms import UserForm, LoginForm, FeedbackForm
+from forms import UserForm, LoginForm, FeedbackForm, DeleteForm
 from models import User, Feedback, connect_db, db
 
 app = Flask(__name__)
@@ -140,3 +140,40 @@ def user_loguout():
     flash('Goodbye!')
     return redirect('/')
 
+#Feedback Routes------------------------------------------------
+@app.route('/feedback/<int:feedback_id>/update', methods=['GET', 'POST'])
+def update_feedback(feedback_id):
+    feedback = Feedback.query.get_or_404(feedback_id)
+
+    if "username" not in session or feedback.username != session['username']:
+        flash('Please Login first!')
+        return redirect('/login')
+    
+    form = FeedbackForm(obj=feedback)
+
+    if form.validate_on_submit():
+        feedback.title = form.title.data
+        feedback.content = form.content.data
+
+        db.session.commit()
+
+        return redirect(f"/users/{feedback.username}")
+
+    return render_template("update_feedback.html", form=form, feedback=feedback)
+
+@app.route("/feedback/<int:feedback_id>/delete", methods=["POST"])
+def delete_feedback(feedback_id):
+    """Delete feedback."""
+
+    feedback = Feedback.query.get(feedback_id)
+    if "username" not in session or feedback.username != session['username']:
+        flash('Please Login First!')
+        return redirect('/login')
+
+    form = DeleteForm()
+
+    if form.validate_on_submit():
+        db.session.delete(feedback)
+        db.session.commit()
+
+    return redirect(f"/users/{feedback.username}")
