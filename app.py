@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, session, flash
-from forms import UserForm, LoginForm
+from forms import UserForm, LoginForm, FeedbackForm
 from models import User, Feedback, connect_db, db
 
 app = Flask(__name__)
@@ -76,7 +76,7 @@ def user_page(username):
         return redirect('/')
     user = User.query.get_or_404(username)
 
-    return render_template('secret.html', user=user)    
+    return render_template('secret.html', user=user, form=FeedbackForm())    
 
 @app.route('/users/<username>/delete', methods=['POST'])
 def delete_user(username):
@@ -87,9 +87,56 @@ def delete_user(username):
     session.pop('username')
     return redirect('/')
 
+@app.route("/users/<username>/feedback/add", methods=["GET", "POST"])
+def new_feedback(username):
+    """Show add-feedback form and process it."""
+
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+
+        feedback = Feedback(
+            title=title,
+            content=content,
+            username=username,
+        )
+
+        db.session.add(feedback)
+        db.session.commit()
+
+        return redirect(f"/users/{feedback.username}")
+
+    else:
+        return render_template("feedback_add.html", form=form)
+
+# @app.route('/users/<username>/feedback/add')
+# def feedback_form():
+#     form = FeedbackForm()
+#     return render_template('feedback_add.html', form=form)
+
+# @app.route('/users/<username>/feedback/add', methods=['POST'])
+# def submit_feedback(username):
+#     form = FeedbackForm()
+    
+#     if form.validate_on_submit():
+#         title = form.title.data
+#         content = form.content.data
+        
+#         feedback = Feedback(
+#                 title=title,
+#                 content=content,
+#                 username=username
+#             )
+#         db.session.add(feedback)
+#         db.session.commit()
+#         return redirect(f'/users/{feedback.username}')
+
 #Route to logout------------------------------------------------
 @app.route('/logout')
 def user_loguout():
     session.pop('username')
     flash('Goodbye!')
     return redirect('/')
+
